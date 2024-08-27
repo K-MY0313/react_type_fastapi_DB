@@ -1,0 +1,4 @@
+cd C:\Users\user\rf\frontend\my-app
+yarn start
+cd rf
+uvicorn backend.main:app --reload
