@@ -26,6 +26,7 @@ export const LoginPage: React.FC = () => {
 
   const sendLoginData = async (qrData: string) => {
     try {
+<<<<<<< HEAD
       const employeeId = qrData
       const response = await axios.post('http://localhost:8000/login/', {
         employee_id: employeeId,
@@ -35,6 +36,14 @@ export const LoginPage: React.FC = () => {
         await axios.post('http://localhost:8000/timestamp/', {
           employee_id: employeeId,
         });
+=======
+      const [employeeId, logType] = qrData.split(',');
+      const response = await axios.post('http://localhost:8000/login/', {
+        employee_id: employeeId,
+        log_type: logType
+      });
+      if (response.data.message === "ログイン成功") {
+>>>>>>> 287608bd1fbad9099b68562a96d8d6977bb4d0ad
         navigate('/selection');
       } else {
         setError('ログインに失敗しました。');
@@ -102,4 +111,8 @@ export const SelectionPage: React.FC = () => {
       </div>
     </div>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 287608bd1fbad9099b68562a96d8d6977bb4d0ad
