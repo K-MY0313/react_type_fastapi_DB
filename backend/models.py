@@ -16,3 +16,4 @@ class AttendanceLog(Base):
     log_id = Column(Integer, primary_key=True, index=True)
     employee_id = Column(String, ForeignKey("employees.employee_id"), nullable=False)
     timestamp = Column(DateTime(timezone=True), nullable=False)
+    attendance = Column(String, nullable=False)

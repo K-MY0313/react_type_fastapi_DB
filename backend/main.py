@@ -48,9 +48,26 @@ def login(login_data: schemas.LoginRequest, db: Session = Depends(database.get_d
 
 @app.post("/timestamp/")
 def create_attendance_log(login_data: schemas.LoginRequest, db: Session = Depends(database.get_db)):
+    # 今日の始まり（午前0時）を取得
+    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # 当日のすべてのログを取得
+    logs_today = db.query(models.AttendanceLog).filter(
+        models.AttendanceLog.employee_id == login_data.employee_id,
+        models.AttendanceLog.timestamp >= today_start
+    ).all()
+    
+    # 出社か退社かを判定
+    if not logs_today:
+        attendance_type = "出社"
+    else:
+        attendance_type = "退社"
+
+    # ログを作成
     db_log = models.AttendanceLog(
         employee_id=login_data.employee_id,
-        timestamp=datetime.now() 
+        timestamp=datetime.now(),
+        attendance=attendance_type
     )
     db.add(db_log)
     db.commit()

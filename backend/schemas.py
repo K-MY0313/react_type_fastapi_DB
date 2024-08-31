@@ -27,9 +27,13 @@ class AttendanceLogCreate(AttendanceLogBase):
 
 class AttendanceLog(AttendanceLogBase):
     log_id: int
+    employee_id: str
+    timestamp: datetime
+    attendance: str
 
     class Config:
         orm_mode = True
 
 class LoginRequest(BaseModel):
     employee_id: str
+   
