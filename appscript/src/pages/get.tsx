@@ -2,26 +2,40 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-interface Employee {
+interface AttendanceLog {
   employee_id: string;
-  name: string;
-  department: string;
-  position: string;
-  birth_date: string;
+  timestamp: string;   // 出退勤時間
+  attendance: string;  // 出退勤状態
 }
 
-const EmployeeGetForm: React.FC = () => {
-  const [department, setDepartment] = useState<string>('');
-  const [data, setData] = useState<Employee[] | null>(null);
+const EmployeeSearchForm: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchType, setSearchType] = useState<string>('department');
+  const [data, setData] = useState<AttendanceLog[] | null>(null);
 
-  const handleGet = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.get<Employee[]>(`http://localhost:8000/departments/${department}`);
+      const response = await axios.get<AttendanceLog[]>(`http://localhost:8000/search/${searchType}/${searchTerm}`);
       console.log('Data successfully retrieved:', response.data);
       setData(response.data);
     } catch (error) {
       console.error('There was an error retrieving the data!', error);
+    }
+  };
+
+  const handleDownloadCSV = () => {
+    if (data) {
+      const csvContent = "data:text/csv;charset=utf-8,"
+        + "ID,timestamp,status\n"
+        + data.map(e => `${e.employee_id},${e.timestamp},${e.attendance}`).join("\n");
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "attendance_logs.csv");
+      document.body.appendChild(link);
+      link.click();
     }
   };
 
@@ -30,25 +44,33 @@ const EmployeeGetForm: React.FC = () => {
       <Link to="/">最初の画面</Link>
       <br />
       <Link to="/post">入力画面</Link>
-      <form onSubmit={handleGet}>
+      <form onSubmit={handleSearch}>
         <div>
-          <label>Department:</label>
-          <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} />
+          <label>検索タイプ:</label>
+          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <option value="employee_id">社員ID</option>
+            <option value="department">部署</option>
+          </select>
         </div>
-        <button type="submit">Get Employee Data</button>
+        <div>
+          <label>検索語:</label>
+          <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        </div>
+        <button type="submit">検索</button>
       </form>
       {data && (
         <div>
-          登録完了しました: <br />
-          {data.map((employee) => (
-            <div key={employee.employee_id}>
-              {employee.name} ({employee.employee_id}), {employee.department}, {employee.position}, {employee.birth_date}
+          <h3>検索結果:</h3>
+          {data.map((log) => (
+            <div key={log.employee_id}>
+              社員番号: {log.employee_id}, 出退勤時間: {log.timestamp}, 状態: {log.attendance}
             </div>
           ))}
+          <button onClick={handleDownloadCSV}>CSVダウンロード</button>
         </div>
       )}
     </>
   );
 }
 
-export default EmployeeGetForm;
+export default EmployeeSearchForm;
